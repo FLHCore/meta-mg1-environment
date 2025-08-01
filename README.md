@@ -16,7 +16,7 @@ This layer depends on:
 ## 🎯 Design Philosophy
 
 This layer follows the principle of **composition over inheritance**:
-- **Universal compatibility** - Works with any base layer (nilm, poky, etc.)
+- **Universal compatibility** - Works with any base layer (poky, nilm, etc.)
 - **Modular features** - Easy to enable/disable specific features
 - **Minimal dependencies** - Only depends on essential layers
 - **Clear separation** - Each feature is independent
@@ -36,9 +36,20 @@ git clone git://git.openembedded.org/meta-openembedded.git -b kirkstone
 
 ## 2. Add Layers to bblayers.conf
 in project `root folder`/build
-```
+
+**Important: Add layers in the correct order (dependencies first):**
+
+```bash
+# 1. First add the dependency layer
 bitbake-layers add-layer ../src/meta-openembedded/meta-webserver
+
+# 2. Then add our layer
 bitbake-layers add-layer ../src/meta-mg1-environment
+```
+
+**Verify layers are added correctly:**
+```bash
+bitbake-layers show-layers
 ```
 
 ## 3. Set DISTRO and MACHINE
@@ -64,7 +75,11 @@ export MACHINE=genio-350-evk
 ```
 
 ## 4. Build the Image
-```
+```bash
+# Test build nginx first
+bitbake nginx
+
+# Build the full image
 bitbake mg1-image
 ```
 
@@ -124,4 +139,11 @@ This layer is designed to work with:
 - Any distro configuration
 - Any Yocto version (kirkstone+)
 
-The key is that it only adds features without changing the base configuration. 
+The key is that it only adds features without changing the base configuration.
+
+## 🔧 Troubleshooting
+
+If you encounter layer dependency errors:
+1. Make sure `meta-webserver` is added before `meta-mg1-environment`
+2. Check that all layers are in the correct order
+3. Verify layer compatibility with `bitbake-layers show-layers` 
