@@ -26,12 +26,11 @@ IMAGE_ROOTFS_EXTRA_SPACE = "5000000"
 
 IMAGE_INSTALL += " \
     nginx \
-    nginx-module-stream \
-    nginx-module-http-headers-more \
-    nginx-module-http-auth-request \
-    nginx-module-http-gunzip \
     ntpdate \
 "
+
+# 配置 nginx 模組
+PACKAGECONFIG:append:pn-nginx = " stream http-auth-request gunzip"
 
 # fix resolv.conf
 ROOTFS_POSTPROCESS_COMMAND += "fix_resolv_conf_symlink;"
