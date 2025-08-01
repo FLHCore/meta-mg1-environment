@@ -34,6 +34,15 @@ git clone git@github.com:FLHCore/meta-hsw-bringup
 git clone git://git.openembedded.org/meta-openembedded.git -b kirkstone
 ```
 
+**Important: If nginx 1.24.0 is not available, update meta-openembedded to the latest kirkstone version:**
+```bash
+# Remove old meta-openembedded
+rm -rf src/meta-openembedded
+
+# Clone the latest kirkstone version
+git clone --branch kirkstone git://git.openembedded.org/meta-openembedded.git
+```
+
 ## 2. Add Layers to bblayers.conf
 in project `root folder`/build
 
@@ -76,8 +85,11 @@ export MACHINE=genio-350-evk
 
 ## 4. Build the Image
 ```bash
-# Test build nginx first
+# Test build nginx first (recommended)
 bitbake nginx
+
+# Check nginx version
+bitbake -e nginx | grep ^PV=
 
 # Build the full image
 bitbake mg1-image
@@ -96,7 +108,7 @@ Look for:
 
 ✅ Included Features
 
-- Nginx web server (1.21.1)
+- **Nginx web server (1.24.0)** - Latest stable version
 - Nginx stream module (TCP/UDP proxying)
 - Nginx headers-more module (advanced header manipulation)
 - Nginx auth-request module (authentication)
@@ -122,6 +134,17 @@ After booting the image:
 3. Enable nginx: `systemctl enable nginx`
 4. Check status: `systemctl status nginx`
 
+## 🔄 Version Management
+
+This layer automatically upgrades nginx to version 1.24.0 (from the default 1.20.1) by:
+- Setting `PREFERRED_VERSION_nginx = "1.24.0"`
+- Overriding `DEFAULT_PREFERENCE = "1"` to ensure higher priority
+
+To check which version is being used:
+```bash
+bitbake -e nginx | grep -E "^(PV|PREFERRED_VERSION_nginx)"
+```
+
 ## 🧩 Extending Features
 
 To add new features, create new packagegroups:
@@ -146,4 +169,14 @@ The key is that it only adds features without changing the base configuration.
 If you encounter layer dependency errors:
 1. Make sure `meta-webserver` is added before `meta-mg1-environment`
 2. Check that all layers are in the correct order
-3. Verify layer compatibility with `bitbake-layers show-layers` 
+3. Verify layer compatibility with `bitbake-layers show-layers`
+
+If nginx version issues:
+1. Check `bitbake -e nginx | grep -E "^(PV|PREFERRED_VERSION_nginx|DEFAULT_PREFERENCE)"`
+2. Clean and rebuild: `bitbake -c clean nginx && bitbake nginx`
+3. **If nginx 1.24.0 is not found, update meta-openembedded:**
+   ```bash
+   cd src
+   rm -rf meta-openembedded
+   git clone --branch kirkstone git://git.openembedded.org/meta-openembedded.git
+   ``` 
